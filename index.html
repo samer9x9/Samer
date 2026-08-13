@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>مطابقة الصندوق اليومي</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="مطابقة الصندوق">
+<meta name="theme-color" content="#0B1530">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230B1530'/%3E%3Ctext x='50' y='64' font-size='50' text-anchor='middle' fill='%232F6FED'%3E%D9%84%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0B1530; --navy-2:#131F42; --accent:#2F6FED; --accent-2:#1D4ED8;
+    --bg:#F3F5FA; --card:#FFFFFF; --border:#E6E9F2; --text:#101B33;
+    --text-soft:#6B7690; --text-faint:#97A0B8;
+    --success:#16A34A; --success-bg:#EAF8EE; --danger:#DC2626; --danger-bg:#FDECEC;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'IBM Plex Sans Arabic',sans-serif; background:var(--bg); color:var(--text);}
+  .disp{font-family:'Cairo',sans-serif;}
+  .mono{font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; direction:ltr; unicode-bidi:plaintext;}
+  .wrap{max-width:720px; margin:0 auto;}
+  header{background:linear-gradient(160deg,var(--navy) 0%,var(--navy-2) 100%); position:relative; overflow:hidden; padding:24px 16px 36px;}
+  header::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 85% -10%, rgba(47,111,237,0.35), transparent 55%);}
+  header::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:28px;background:var(--bg);border-radius:28px 28px 0 0;}
+  .hrow{position:relative;z-index:1;}
+  .top-row{display:flex; align-items:flex-start; justify-content:space-between; gap:12px;}
+  .brand{display:flex; align-items:center; gap:12px;}
+  .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#EAF0FF;cursor:pointer;}
+  .eyebrow{color:#8FA3D9;letter-spacing:.08em;font-size:11px;font-weight:600;margin-bottom:2px;}
+  h1{color:#F7F9FF;font-size:21px;margin:0;}
+  .hfields{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;}
+  .hfield{display:flex;align-items:center;gap:8px;padding:0 12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:11px;min-height:46px;flex:1;min-width:150px;}
+  .hfield input{background:transparent;border:none;color:#F3F6FF;outline:none;font-size:15px;width:100%;font-family:inherit;}
+  .hfield input::placeholder{color:#A9B4D6;}
+  main{padding:0 16px 40px; margin-top:-28px; position:relative; z-index:1;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:0 1px 2px rgba(16,27,51,.04),0 8px 20px -12px rgba(16,27,51,.1); margin-bottom:16px;}
+  .hero{background:linear-gradient(135deg,var(--navy) 0%,#182852 55%,var(--accent-2) 130%);border-radius:20px;position:relative;overflow:hidden;box-shadow:0 14px 30px -14px rgba(11,21,48,.55); padding:22px; margin-bottom:16px;}
+  .hero-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;position:relative;z-index:1;}
+  .hero-title{display:flex;align-items:center;gap:8px;color:#F7F9FF;font-weight:700;font-size:15px;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;}
+  .chips{display:flex;gap:10px;flex-wrap:wrap;position:relative;z-index:1;}
+  .chip{flex:1;min-width:150px;border-radius:16px;padding:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);}
+  .chip-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .chip-label{font-size:11px;font-weight:600;color:#BFCBEE;}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .chip-val{font-size:20px;font-weight:700;display:flex;align-items:center;gap:4px;}
+  .chip-sub{font-size:10px;margin-top:4px;color:#8393BE;}
+  .mismatches{margin-top:14px;display:flex;flex-direction:column;gap:8px;position:relative;z-index:1;}
+  .mm-item{display:flex;gap:10px;font-size:13px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:#E3E9FF;align-items:flex-start;}
+  .sec-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+  .sec-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;}
+  .sec-title{font-weight:700;font-size:15px;margin:0;}
+  .sec-sub{font-size:12px;color:var(--text-soft);margin:2px 0 0;}
+  .cardpad{padding:18px;}
+  .triplet{display:flex;gap:10px;flex-wrap:wrap;}
+  .field{flex:1;min-width:145px;}
+  label.l{font-size:12px;font-weight:600;color:var(--text-soft);display:block;margin-bottom:6px;}
+  input[type=number], input[type=text], input[type=date], textarea{
+    font-family:'IBM Plex Mono',monospace; direction:ltr; text-align:left;
+    background:#FBFCFE; border:1.5px solid var(--border); border-radius:11px;
+    padding:11px 12px; font-size:16px; color:var(--text); width:100%; outline:none;
+    min-height:46px; box-sizing:border-box;
+  }
+  input[type=text].ar, textarea{font-family:'IBM Plex Sans Arabic',sans-serif; direction:rtl; text-align:right;}
+  input:focus, textarea:focus{border-color:var(--accent); box-shadow:0 0 0 3px rgba(47,111,237,.12);}
+  .hint{font-size:11px;margin-top:10px;color:var(--text-faint);}
+  .actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:14px;font-weight:700;padding:12px 18px;border-radius:13px;cursor:pointer;border:1.5px solid transparent;min-height:46px;font-family:'IBM Plex Sans Arabic',sans-serif;}
+  .btn-primary{background:linear-gradient(135deg,var(--accent) 0%,var(--accent-2) 100%);color:#fff;box-shadow:0 8px 18px -8px rgba(47,111,237,.55);}
+  .btn-ghost{background:#fff;border-color:var(--border);color:var(--text);}
+  .status{font-size:12px;font-weight:600;}
+  .footer-note{display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;color:var(--text-faint);padding-bottom:6px;}
+  .hist-panel{padding:16px; display:none;}
+  .hist-panel.open{display:block;}
+  .hist-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .hist-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-radius:12px;background:#F7F9FC;border:1px solid var(--border);margin-bottom:8px;}
+  .hist-name{font-size:13px;font-weight:600;}
+  .hist-emp{font-size:11px;color:var(--text-soft);}
+  .hist-actions{display:flex;gap:6px;flex-shrink:0;}
+  .btn-sm{padding:6px 11px;font-size:12px;min-height:0;border-radius:9px;}
+  .btn-danger-ghost{background:var(--danger-bg);color:var(--danger);}
+  .install-banner{display:none;position:fixed;left:12px;right:12px;bottom:12px;background:var(--navy);color:#fff;padding:12px 14px;border-radius:14px;box-shadow:0 10px 24px rgba(0,0,0,.3);align-items:center;justify-content:space-between;gap:10px;z-index:50;font-size:13px;}
+  .install-banner.show{display:flex;}
+  .install-banner button{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap hrow">
+    <div class="top-row">
+      <div class="brand">
+        <div class="icon-btn" style="background:rgba(47,111,237,.22);border-color:rgba(47,111,237,.4);">🏦</div>
+        <div>
+          <div class="eyebrow">إدارة الصندوق اليومي</div>
+          <h1 class="disp">مطابقة الكتلة المالية</h1>
+        </div>
+      </div>
+      <div class="icon-btn" id="historyToggle">🕘</div>
+    </div>
+    <div class="hfields">
+      <div class="hfield"><span>📅</span><input type="date" id="f-date"></div>
+      <div class="hfield"><span>👤</span><input type="text" id="f-employee" placeholder="اسم العامل المستلم للسلفة"></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="card hist-panel" id="histPanel">
+    <div class="hist-top">
+      <strong id="histCount" style="font-size:14px;">السجلات المحفوظة (0)</strong>
+      <span id="histClose" style="cursor:pointer;color:var(--text-soft);">✕</span>
+    </div>
+    <div id="histList"></div>
+  </div>
+</div>
+
+<main>
+  <div class="wrap">
+
+    <div class="hero">
+      <div class="hero-top">
+        <div class="hero-title">🛡️ نتيجة المطابقة</div>
+        <div class="badge" id="matchBadge"></div>
+      </div>
+      <div class="chips" id="chips"></div>
+      <div class="mismatches" id="mismatches"></div>
+    </div>
+
+    <div class="card cardpad">
+      <div class="sec-head"><div class="sec-icon" style="background:#EAF0FE;">💰</div><div><h2 class="sec-title disp">السلفة الممنوحة</h2><p class="sec-sub">من أمين الصندوق إلى العامل</p></div></div>
+      <div class="triplet" id="triplet-advance"></div>
+    </div>
+
+    <div class="card cardpad">
+      <div class="sec-head"><div class="sec-icon" style="background:#E5FAF8;">🧾</div><div><h2 class="sec-title disp">الايصالات المقبوضة</h2><p class="sec-sub">مجموع ما تم قبضه من المراجعين</p></div></div>
+      <div class="triplet" id="triplet-receipts"></div>
+    </div>
+
+    <div class="card cardpad">
+      <div class="sec-head"><div class="sec-icon" style="background:#FEF3E2;">📈</div><div><h2 class="sec-title disp">أسعار الصرف المعتمدة</h2><p class="sec-sub">مقابل الدولار الأمريكي الواحد</p></div></div>
+      <div class="triplet">
+        <div class="field"><label class="l">1 دولار = كم ليرة تركية؟</label><input type="number" inputmode="decimal" id="rate-TRY" placeholder="مثال 48"></div>
+        <div class="field"><label class="l">1 دولار = كم ليرة سورية؟</label><input type="number" inputmode="decimal" id="rate-SYP" placeholder="مثال 14500"></div>
+      </div>
+      <div class="hint">تُستخدم هذه الأسعار لعرض القيمة المكافئة تلقائياً عند وجود فرق في المطابقة.</div>
+    </div>
+
+    <div class="card cardpad">
+      <div class="sec-head"><div class="sec-icon" style="background:#F2ECFE;">🏛️</div><div><h2 class="sec-title disp">الكتلة المسلَّمة فعلياً</h2><p class="sec-sub">نتيجة الجرد الفعلي عند تسليم الصندوق</p></div></div>
+      <div class="triplet" id="triplet-closing"></div>
+    </div>
+
+    <div class="card cardpad">
+      <label class="l">ملاحظات (اختياري)</label>
+      <textarea id="f-notes" rows="2" class="ar" placeholder="أي تفاصيل إضافية حول فروقات المطابقة أو ظروف الدوام"></textarea>
+      <div class="actions">
+        <button class="btn btn-primary" id="saveBtn">💾 حفظ سجل اليوم</button>
+        <button class="btn btn-ghost" id="resetBtn">سجل جديد</button>
+        <span class="status" id="statusMsg"></span>
+      </div>
+    </div>
+
+    <div class="footer-note">🛡️ السجلات محفوظة محلياً على هذا الجهاز فقط ولا يطّلع عليها أحد سواك</div>
+  </div>
+</main>
+
+<div class="install-banner" id="installBanner">
+  <span>ثبّت هذا التطبيق على شاشتك الرئيسية للوصول السريع</span>
+  <button id="installBtn">تثبيت</button>
+</div>
+
+<script>
+const CURRENCIES = [
+  {key:'SYP', label:'ليرة سورية', symbol:'ل.س', color:'#2563EB'},
+  {key:'TRY', label:'ليرة تركية', symbol:'₺', color:'#0EA5A0'},
+  {key:'USD', label:'دولار أمريكي', symbol:'$', color:'#16A34A'},
+];
+
+const num = v => { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; };
+const fmt = n => new Intl.NumberFormat('en-US',{maximumFractionDigits:2,minimumFractionDigits:0}).format(Math.abs(n)<0.005?0:n);
+
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+const state = {
+  date: todayStr(), employee:'',
+  advance:{SYP:'',TRY:'',USD:''}, receipts:{SYP:'',TRY:'',USD:''}, closing:{SYP:'',TRY:'',USD:''},
+  rates:{TRY:'',SYP:''}, notes:''
+};
+
+function rateOf(cur){ return cur==='USD' ? 1 : num(state.rates[cur]); }
+function convert(amt, fromCur, toCur){
+  if(fromCur===toCur) return amt;
+  const rFrom = rateOf(fromCur), rTo = rateOf(toCur);
+  if(fromCur!=='USD' && rFrom<=0) return null;
+  if(toCur!=='USD' && rTo<=0) return null;
+  const usd = fromCur==='USD' ? amt : amt/rFrom;
+  return toCur==='USD' ? usd : usd*rTo;
+}
+
+function buildTriplet(container, obj){
+  container.innerHTML = CURRENCIES.map(c => `
+    <div class="field">
+      <label class="l">${c.label} <span class="mono">(${c.symbol})</span></label>
+      <input type="number" inputmode="decimal" placeholder="0" data-cur="${c.key}" value="${obj[c.key]}">
+    </div>`).join('');
+}
+
+document.getElementById('f-date').value = state.date;
+buildTriplet(document.getElementById('triplet-advance'), state.advance);
+buildTriplet(document.getElementById('triplet-receipts'), state.receipts);
+buildTriplet(document.getElementById('triplet-closing'), state.closing);
+
+function bindTriplet(container, obj){
+  container.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{ obj[inp.dataset.cur] = inp.value; renderSummary(); });
+  });
+}
+bindTriplet(document.getElementById('triplet-advance'), state.advance);
+bindTriplet(document.getElementById('triplet-receipts'), state.receipts);
+bindTriplet(document.getElementById('triplet-closing'), state.closing);
+
+document.getElementById('rate-TRY').addEventListener('input', e=>{ state.rates.TRY = e.target.value; renderSummary(); });
+document.getElementById('rate-SYP').addEventListener('input', e=>{ state.rates.SYP = e.target.value; renderSummary(); });
+document.getElementById('f-date').addEventListener('input', e=>{ state.date = e.target.value; });
+document.getElementById('f-employee').addEventListener('input', e=>{ state.employee = e.target.value; });
+document.getElementById('f-notes').addEventListener('input', e=>{ state.notes = e.target.value; });
+
+function renderSummary(){
+  const totals = {};
+  let allMatched = true, anyData = false;
+  CURRENCIES.forEach(c=>{
+    const adv = num(state.advance[c.key]), rec = num(state.receipts[c.key]), cls = num(state.closing[c.key]);
+    const expected = adv+rec, diff = cls-expected, matched = Math.abs(diff)<0.01;
+    totals[c.key] = {adv,rec,cls,expected,diff,matched};
+    if(!matched) allMatched=false;
+    if(state.advance[c.key]||state.receipts[c.key]||state.closing[c.key]) anyData=true;
+  });
+
+  const badge = document.getElementById('matchBadge');
+  if(anyData){
+    badge.style.display='inline-flex';
+    badge.style.background = allMatched ? 'rgba(22,163,74,.18)' : 'rgba(220,38,38,.18)';
+    badge.style.color = allMatched ? '#7CE3A0' : '#FF9C93';
+    badge.style.border = `1px solid ${allMatched?'rgba(22,163,74,.35)':'rgba(220,38,38,.35)'}`;
+    badge.innerHTML = allMatched ? '✓ متطابقة بالكامل' : '⚠ يوجد فرق';
+  } else { badge.style.display='none'; }
+
+  document.getElementById('chips').innerHTML = CURRENCIES.map(c=>{
+    const t = totals[c.key]; const positive = t.diff>=0;
+    const dotColor = t.matched ? '#22C55E' : '#F87171';
+    const valColor = t.matched ? '#F7F9FF' : (positive?'#7CE3A0':'#FF9C93');
+    const valText = t.matched ? fmt(t.cls) : `${positive?'+':''}${fmt(t.diff)}`;
+    return `<div class="chip">
+      <div class="chip-top"><span class="chip-label">${c.label}</span><span class="dot" style="background:${dotColor}"></span></div>
+      <div class="chip-val mono" style="color:${valColor}">${valText}</div>
+      <div class="chip-sub mono">متوقع ${fmt(t.expected)} · فعلي ${fmt(t.cls)}</div>
+    </div>`;
+  }).join('');
+
+  const mmBox = document.getElementById('mismatches');
+  if(anyData && !allMatched){
+    mmBox.innerHTML = CURRENCIES.filter(c=>!totals[c.key].matched).map(c=>{
+      const t = totals[c.key]; const isShort = t.diff<0; const amount = Math.abs(t.diff);
+      const others = CURRENCIES.filter(o=>o.key!==c.key).map(o=>{
+        const conv = convert(amount, c.key, o.key);
+        return conv!=null ? `${fmt(conv)} ${o.symbol}` : null;
+      }).filter(Boolean);
+      const othersText = others.length>0 ? ` (<span class="mono" style="font-weight:600">${others.join(' أو ')}</span> حسب سعر الصرف المحدد)` : ' — أدخل سعر الصرف أعلاه لعرض القيمة المكافئة';
+      return `<div class="mm-item">⚠️ <span>${isShort?'نقص':'زيادة'} <span class="mono" style="font-weight:700">${fmt(amount)} ${c.symbol}</span> في ${c.label} — يجب أن ${isShort?'يقابله زيادة':'يقابلها نقص'} بنفس القيمة في عملة أخرى${othersText}.</span></div>`;
+    }).join('');
+  } else { mmBox.innerHTML=''; }
+}
+renderSummary();
+
+// ---- Storage (localStorage, since this is a standalone hosted page) ----
+function recordKey(){ return `record:${state.date}__${(state.employee||'بدون-اسم').trim()}`; }
+
+document.getElementById('saveBtn').addEventListener('click', ()=>{
+  try{
+    localStorage.setItem(recordKey(), JSON.stringify(state));
+    showStatus('تم حفظ السجل بنجاح', true);
+    refreshHistory();
+  }catch(e){ showStatus('تعذّر حفظ السجل', false); }
+});
+
+function showStatus(text, ok){
+  const el = document.getElementById('statusMsg');
+  el.textContent = text; el.style.color = ok ? '#16A34A' : '#DC2626';
+  setTimeout(()=>{ el.textContent=''; }, 2500);
+}
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  state.date = todayStr(); state.employee=''; state.notes='';
+  state.advance={SYP:'',TRY:'',USD:''}; state.receipts={SYP:'',TRY:'',USD:''}; state.closing={SYP:'',TRY:'',USD:''};
+  state.rates={TRY:'',SYP:''};
+  document.getElementById('f-date').value = state.date;
+  document.getElementById('f-employee').value='';
+  document.getElementById('f-notes').value='';
+  document.getElementById('rate-TRY').value=''; document.getElementById('rate-SYP').value='';
+  buildTriplet(document.getElementById('triplet-advance'), state.advance);
+  buildTriplet(document.getElementById('triplet-receipts'), state.receipts);
+  buildTriplet(document.getElementById('triplet-closing'), state.closing);
+  bindTriplet(document.getElementById('triplet-advance'), state.advance);
+  bindTriplet(document.getElementById('triplet-receipts'), state.receipts);
+  bindTriplet(document.getElementById('triplet-closing'), state.closing);
+  renderSummary();
+});
+
+function refreshHistory(){
+  const keys = Object.keys(localStorage).filter(k=>k.startsWith('record:'));
+  document.getElementById('histCount').textContent = `السجلات المحفوظة (${keys.length})`;
+  const list = document.getElementById('histList');
+  if(keys.length===0){ list.innerHTML = '<div style="font-size:12px;color:var(--text-soft)">لا توجد سجلات محفوظة بعد</div>'; return; }
+  list.innerHTML = keys.map(k=>{
+    const raw = k.replace(/^record:/,''); const [d,emp] = raw.split('__');
+    return `<div class="hist-row">
+      <div><div class="hist-name mono">${d}</div><div class="hist-emp">${emp}</div></div>
+      <div class="hist-actions">
+        <button class="btn btn-primary btn-sm" data-load="${k}">فتح</button>
+        <button class="btn btn-danger-ghost btn-sm" data-del="${k}">حذف</button>
+      </div>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('[data-load]').forEach(b=>b.addEventListener('click', ()=>loadRecord(b.dataset.load)));
+  list.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click', ()=>{ localStorage.removeItem(b.dataset.del); refreshHistory(); }));
+}
+
+function loadRecord(key){
+  try{
+    const raw = localStorage.getItem(key);
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    Object.assign(state, {
+      date: data.date||todayStr(), employee: data.employee||'',
+      advance: data.advance||{SYP:'',TRY:'',USD:''}, receipts: data.receipts||{SYP:'',TRY:'',USD:''},
+      closing: data.closing||{SYP:'',TRY:'',USD:''}, rates: data.rates||{TRY:'',SYP:''}, notes: data.notes||''
+    });
+    document.getElementById('f-date').value = state.date;
+    document.getElementById('f-employee').value = state.employee;
+    document.getElementById('f-notes').value = state.notes;
+    document.getElementById('rate-TRY').value = state.rates.TRY;
+    document.getElementById('rate-SYP').value = state.rates.SYP;
+    buildTriplet(document.getElementById('triplet-advance'), state.advance);
+    buildTriplet(document.getElementById('triplet-receipts'), state.receipts);
+    buildTriplet(document.getElementById('triplet-closing'), state.closing);
+    bindTriplet(document.getElementById('triplet-advance'), state.advance);
+    bindTriplet(document.getElementById('triplet-receipts'), state.receipts);
+    bindTriplet(document.getElementById('triplet-closing'), state.closing);
+    renderSummary();
+    document.getElementById('histPanel').classList.remove('open');
+    showStatus('تم تحميل السجل', true);
+  }catch(e){ showStatus('تعذّر تحميل السجل', false); }
+}
+
+document.getElementById('historyToggle').addEventListener('click', ()=>{
+  const p = document.getElementById('histPanel');
+  p.classList.toggle('open');
+  if(p.classList.contains('open')) refreshHistory();
+});
+document.getElementById('histClose').addEventListener('click', ()=> document.getElementById('histPanel').classList.remove('open'));
+
+// ---- PWA install prompt ----
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault(); deferredPrompt = e;
+  document.getElementById('installBanner').classList.add('show');
+});
+document.getElementById('installBtn').addEventListener('click', async ()=>{
+  document.getElementById('installBanner').classList.remove('show');
+  if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; }
+});
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
